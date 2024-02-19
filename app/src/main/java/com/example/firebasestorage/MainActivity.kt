@@ -41,6 +41,23 @@ class MainActivity : AppCompatActivity() {
                 downloadImage("myImage")
             }
 
+            btnDelete.setOnClickListener {
+                deleteImage("1708337819285.jpg")
+            }
+
+        }
+    }
+
+    fun deleteImage(fileName: String) = CoroutineScope(Dispatchers.IO).launch {
+        try {
+            imageRef.child("images/$fileName").delete().await()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@MainActivity, "File deleted", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@MainActivity, e.message, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
