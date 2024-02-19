@@ -1,6 +1,7 @@
 package com.example.firebasestorage
 
 import android.content.Intent
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -12,6 +13,7 @@ import com.google.firebase.storage.storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 @Suppress("DEPRECATION")
@@ -34,6 +36,26 @@ class MainActivity : AppCompatActivity() {
             }
             buttonUpload.setOnClickListener {
                 uploadImageStorage(System.currentTimeMillis().toString() + ".jpg")
+            }
+            btnDownload.setOnClickListener {
+                downloadImage("myImage")
+            }
+
+        }
+    }
+
+    fun downloadImage(fileName: String) = CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val maxDownloadSize = 1024 * 1024 * 5L
+            val bytes = imageRef.child("images/$fileName").getBytes(maxDownloadSize).await()
+            val bmp = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            withContext(Dispatchers.Main) {
+                binding.imageView.setImageBitmap(bmp)
+            }
+
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@MainActivity, e.message, Toast.LENGTH_SHORT).show()
             }
         }
     }
