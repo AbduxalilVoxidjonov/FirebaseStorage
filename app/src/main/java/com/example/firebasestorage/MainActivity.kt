@@ -44,7 +44,27 @@ class MainActivity : AppCompatActivity() {
             btnDelete.setOnClickListener {
                 deleteImage("1708337819285.jpg")
             }
+        }
+        rvImages()
+    }
 
+    fun rvImages() = CoroutineScope(Dispatchers.IO).launch {
+        try {
+            val images = mutableListOf<String>()
+            imageRef.child("images/").listAll().await()
+                .items.forEach {
+                    val url = it.downloadUrl.await()
+                    images.add(url.toString())
+                }
+
+            withContext(Dispatchers.Main) {
+                val adapter = AdapterRv(images)
+                binding.recyclerView.adapter = adapter
+            }
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@MainActivity, e.message, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
